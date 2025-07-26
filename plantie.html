@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUARDIAN | Plant Protection System</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'mono': ['"Space Mono"', 'monospace'],
+                    },
+                    colors: {
+                        'neon': '#00FF41',
+                        'void': '#000000',
+                        'ghost': '#FFFFFF',
+                        'smoke': {
+                            100: '#F5F5F5',
+                            200: '#E5E5E5',
+                            300: '#D4D4D4',
+                            400: '#A3A3A3',
+                            500: '#737373',
+                            600: '#525252',
+                            700: '#404040',
+                            800: '#262626',
+                            900: '#171717'
+                        }
+                    },
+                    animation: {
+                        'pulse-neon': 'pulse-neon 2s ease-in-out infinite',
+                        'scan': 'scan 3s linear infinite',
+                        'flicker': 'flicker 0.15s infinite linear alternate',
+                        'terminal': 'terminal 1s ease-out',
+                        'guardian-boot': 'guardian-boot 2s ease-out'
+                    },
+                    keyframes: {
+                        'pulse-neon': {
+                            '0%, 100%': { 
+                                boxShadow: '0 0 5px #00FF41, 0 0 10px #00FF41, 0 0 15px #00FF41',
+                                opacity: 1
+                            },
+                            '50%': { 
+                                boxShadow: '0 0 2px #00FF41, 0 0 5px #00FF41, 0 0 8px #00FF41',
+                                opacity: 0.8
+                            }
+                        },
+                        'scan': {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(300px)' }
+                        },
+                        'flicker': {
+                            '0%': { opacity: 1 },
+                            '100%': { opacity: 0.95 }
+                        },
+                        'terminal': {
+                            '0%': { width: 0 },
+                            '100%': { width: 100 }
+                        },
+                        'guardian-boot': {
+                            '0%': { opacity: 0, transform: 'scale(0.9)' },
+                            '50%': { opacity: 0.7, transform: 'scale(1.02)' },
+                            '100%': { opacity: 1, transform: 'scale(1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { 
+            font-family: 'Space Mono', monospace; 
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00FF41, transparent);
+            animation: scan 3s linear infinite;
+            z-index: 10;
+        }
+        
+        .terminal-cursor::after {
+            content: '█';
+            color: #00FF41;
+            animation: flicker 1s infinite;
+        }
+        
+        .brutalist-shadow {
+            box-shadow: 8px 8px 0px #000;
+        }
+        
+        .brutalist-shadow:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 10px 10px 0px #000;
+        }
+        
+        .guardian-grid {
+            background-image: 
+                linear-gradient(rgba(0,255,65,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,65,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            clip: rect(0, 0, 0, 0);
+        }
+        
+        .glitch::before {
+            animation: glitch-1 0.3s infinite;
+            color: #00FF41;
+            z-index: -1;
+        }
+        
+        @keyframes glitch-1 {
+            0%, 14%, 15%, 49%, 50%, 99%, 100% { 
+                clip: rect(0, 0, 0, 0); 
+            }
+            15%, 49% { 
+                clip: rect(10px, 9999px, 15px, 0); 
+                transform: translateX(-2px);
+            }
+        }
+    </style>
+</head>
+<body class="font-mono bg-void text-ghost min-h-screen overflow-hidden">
+    <div id="app" class="relative">
+        
+        <!-- BACKGROUND GRID -->
+        <div class="fixed inset-0 guardian-grid opacity-30"></div>
+        
+        <!-- SCAN LINE EFFECT -->
+        <div class="scan-line"></div>
+        
+        <!-- MAIN INTERFACE -->
+        <div class="relative z-20 min-h-screen flex flex-col">
+            
+            <!-- HEADER -->
+            <header class="border-b-2 border-smoke-800 p-6 bg-void">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-8 h-8 bg-neon border-2 border-void animate-pulse-neon"></div>
+                        <div>
+                            <h1 class="text-3xl font-bold tracking-tight glitch" data-text="GUARDIAN">
+                                GUARDIAN
+                            </h1>
+                            <p class="text-smoke-400 text-sm font-bold">PLANT.PROTECTION.SYSTEM</p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-neon">{{ systemTime }}</div>
+                        <div class="text-smoke-400 text-xs">SYSTEM.UPTIME</div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- MAIN DASHBOARD -->
+            <main class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- GUARDIAN STATUS -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- GUARDIAN VISUALIZATION -->
+                    <div class="bg-smoke-900 border-2 border-smoke-700 p-8 brutalist-shadow">
+                        <div class="text-center relative">
+                            <h2 class="text-xl font-bold mb-6 text-neon">GUARDIAN.UNIT.STATUS</h2>
+                            
+                            <!-- ROBOT GUARDIAN ILLUSTRATION -->
+                            <div class="relative inline-block animate-guardian-boot">
+                                <!-- BODY -->
+                                <div class="w-32 h-40 bg-smoke-200 border-4 border-void mx-auto relative">
+                                    <!-- HEAD -->
+                                    <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-smoke-100 border-4 border-void">
+                                        <!-- EYES -->
+                                        <div class="absolute top-4 left-3 w-3 h-3 bg-neon border border-void animate-pulse-neon"></div>
+                                        <div class="absolute top-4 right-3 w-3 h-3 bg-neon border border-void animate-pulse-neon"></div>
+                                        <!-- ANTENNA -->
+                                        <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-1 h-6 bg-void"></div>
+                                        <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-neon border border-void animate-pulse-neon"></div>
+                                    </div>
+                                    
+                                    <!-- CHEST PANEL -->
+                                    <div class="absolute top-8 left-1/2 transform -translate-x-1/2 w-16 h-12 bg-void border-2 border-smoke-600">
+                                        <div class="p-2 space-y-1">
+                                            <div class="w-full h-1 bg-neon"></div>
+                                            <div class="w-3/4 h-1 bg-smoke-500"></div>
+                                            <div class="w-1/2 h-1 bg-smoke-500"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- ARMS -->
+                                    <div class="absolute top-4 -left-8 w-6 h-16 bg-smoke-300 border-2 border-void"></div>
+                                    <div class="absolute top-4 -right-8 w-6 h-16 bg-smoke-300 border-2 border-void"></div>
+                                    
+                                    <!-- LEGS -->
+                                    <div class="absolute -bottom-16 left-6 w-6 h-16 bg-smoke-300 border-2 border-void"></div>
+                                    <div class="absolute -bottom-16 right-6 w-6 h-16 bg-smoke-300 border-2 border-void"></div>
+                                </div>
+                                
+                                <!-- PLANT PROTECTION AREA -->
+                                <div class="absolute -bottom-20 left-1/2 transform -translate-x-1/2 w-40 h-12 border-2 border-neon bg-void/20">
+                                    <div class="p-2 flex justify-center items-center">
+                                        <div class="text-neon text-xs font-bold">PROTECTED.ZONE</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- STATUS MESSAGE -->
+                            <div class="mt-8 bg-void p-4 border border-smoke-700">
+                                <p class="text-neon font-bold terminal-cursor">{{ guardian.currentMessage }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- SYSTEM DIAGNOSTICS -->
+                    <div class="bg-smoke-900 border-2 border-smoke-700 p-6 brutalist-shadow">
+                        <h3 class="text-lg font-bold mb-4 text-neon">SYSTEM.DIAGNOSTICS</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div v-for="diagnostic in diagnostics" :key="diagnostic.name" 
+                                 class="bg-void p-3 border border-smoke-600">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-smoke-300 text-sm font-bold">{{ diagnostic.name }}</span>
+                                    <div class="flex items-center">
+                                        <div class="status-indicator" 
+                                             :class="diagnostic.status === 'ONLINE' ? 'bg-neon animate-pulse-neon' : 'bg-smoke-500'"></div>
+                                        <span class="text-xs font-bold" 
+                                              :class="diagnostic.status === 'ONLINE' ? 'text-neon' : 'text-smoke-500'">
+                                            {{ diagnostic.status }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-xs text-smoke-400">{{ diagnostic.value }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CONTROL PANEL -->
+                <div class="space-y-6">
+                    
+                    <!-- ENVIRONMENTAL MONITORING -->
+                    <div class="bg-smoke-900 border-2 border-smoke-700 p-6 brutalist-shadow">
+                        <h3 class="text-lg font-bold mb-4 text-neon">ENVIRONMENT.SCAN</h3>
+                        <div class="space-y-4">
+                            <div v-for="sensor in sensors" :key="sensor.name" class="bg-void p-3 border border-smoke-600">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-smoke-300 text-sm font-bold">{{ sensor.name }}</span>
+                                    <span class="text-neon font-bold">{{ sensor.value }}{{ sensor.unit }}</span>
+                                </div>
+                                <div class="w-full bg-smoke-800 h-2 border border-smoke-600">
+                                    <div class="h-full bg-neon transition-all duration-500" 
+                                         :style="`width: ${sensor.percentage}%`"></div>
+                                </div>
+                                <div class="text-xs text-smoke-500 mt-1">{{ sensor.status }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- GUARDIAN ACTIONS -->
+                    <div class="bg-smoke-900 border-2 border-smoke-700 p-6 brutalist-shadow">
+                        <h3 class="text-lg font-bold mb-4 text-neon">GUARDIAN.ACTIONS</h3>
+                        <div class="space-y-3">
+                            <button v-for="action in actions" :key="action.name"
+                                    @click="executeAction(action)"
+                                    :disabled="!action.available"
+                                    class="w-full bg-void border-2 border-smoke-600 p-3 text-left font-bold text-sm transition-all duration-200"
+                                    :class="action.available ? 'hover:border-neon hover:text-neon text-smoke-300' : 'text-smoke-600 cursor-not-allowed'">
+                                <div class="flex justify-between items-center">
+                                    <span>{{ action.name }}</span>
+                                    <span class="text-xs">{{ action.status }}</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- EMERGENCY PROTOCOLS -->
+                    <div class="bg-smoke-900 border-2 border-smoke-700 p-6 brutalist-shadow">
+                        <h3 class="text-lg font-bold mb-4 text-neon">EMERGENCY.PROTOCOLS</h3>
+                        <button @click="emergencyMode = !emergencyMode"
+                                class="w-full bg-void border-2 p-4 font-bold transition-all duration-200"
+                                :class="emergencyMode ? 'border-neon text-neon animate-pulse-neon' : 'border-smoke-600 text-smoke-300 hover:border-neon hover:text-neon'">
+                            {{ emergencyMode ? 'EMERGENCY.MODE.ACTIVE' : 'ACTIVATE.EMERGENCY.MODE' }}
+                        </button>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- FOOTER STATUS BAR -->
+            <footer class="border-t-2 border-smoke-800 p-4 bg-void">
+                <div class="flex justify-between items-center text-xs">
+                    <div class="flex space-x-6">
+                        <span class="text-neon">GUARDIAN.v2.0.1</span>
+                        <span class="text-smoke-500">TEAM.BURN.THAT.HARDWARE</span>
+                        <span class="text-smoke-500">PLANT.PROTECTION.ACTIVE</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="status-indicator bg-neon animate-pulse-neon"></div>
+                        <span class="text-neon font-bold">ALL.SYSTEMS.NOMINAL</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+        
+        <!-- TECHNICAL DOCS MODAL -->
+        <div v-if="showTechDocs" class="fixed inset-0 bg-void/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-smoke-900 border-4 border-neon w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <div class="border-b-2 border-smoke-700 p-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-neon">GUARDIAN.TECHNICAL.SPECIFICATIONS</h2>
+                        <button @click="showTechDocs = false" class="text-smoke-400 hover:text-neon text-2xl font-bold">×</button>
+                    </div>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <!-- COMPONENT BREAKDOWN -->
+                    <section>
+                        <h3 class="text-xl font-bold text-neon mb-4">HARDWARE.COMPONENTS</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div v-for="component in techSpecs.components" :key="component.name"
+                                 class="bg-void p-4 border border-smoke-600">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-smoke-200 font-bold text-sm">{{ component.name }}</span>
+                                    <span class="text-neon font-bold">₹{{ component.cost }}</span>
+                                </div>
+                                <div class="text-smoke-400 text-xs mb-2">{{ component.function }}</div>
+                                <div class="text-smoke-500 text-xs">{{ component.description }}</div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- SYSTEM ARCHITECTURE -->
+                    <section>
+                        <h3 class="text-xl font-bold text-neon mb-4">SYSTEM.ARCHITECTURE</h3>
+                        <div class="bg-void p-6 border border-smoke-600">
+                            <pre class="text-smoke-300 text-xs overflow-x-auto"><code>// GUARDIAN Core Protection Logic
+class GuardianAI {
+  constructor() {
+    this.protectionMode = 'ACTIVE';
+    this.threatLevel = 'NOMINAL';
+    this.plantHealth = {
+      moisture: 0,
+      light: 0,
+      temperature: 0,
+      nutrients: 0
+    };
+  }
+
+  assessThreat() {
+    const threats = this.scanEnvironment();
+    if (threats.moisture < 30) {
+      this.activateWateringProtocol();
+    }
+    if (threats.light < 20) {
+      this.activateGrowLights();
+    }
+    this.updateThreatLevel();
+  }
+
+  protectPlants() {
+    while (this.protectionMode === 'ACTIVE') {
+      this.assessThreat();
+      this.monitorVitals();
+      this.reportStatus();
+      await this.sleep(1000);
+    }
+  }
+}</code></pre>
+                        </div>
+                    </section>
+                    
+                    <!-- PROJECT SPECS -->
+                    <section>
+                        <h3 class="text-xl font-bold text-neon mb-4">PROJECT.SPECIFICATIONS</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-void p-4 border border-smoke-600 text-center">
+                                <div class="text-2xl font-bold text-neon">₹{{ techSpecs.totalCost }}</div>
+                                <div class="text-smoke-400 text-xs">TOTAL.COST</div>
+                            </div>
+                            <div class="bg-void p-4 border border-smoke-600 text-center">
+                                <div class="text-2xl font-bold text-neon">{{ techSpecs.bonusPoints }}</div>
+                                <div class="text-smoke-400 text-xs">BONUS.POINTS</div>
+                            </div>
+                            <div class="bg-void p-4 border border-smoke-600 text-center">
+                                <div class="text-2xl font-bold text-neon">{{ techSpecs.complexity }}</div>
+                                <div class="text-smoke-400 text-xs">COMPLEXITY</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    systemTime: '00:00:00',
+                    emergencyMode: false,
+                    showTechDocs: false,
+                    guardian: {
+                        currentMessage: 'GUARDIAN ONLINE. PLANT PROTECTION PROTOCOLS ACTIVE.',
+                        mode: 'PROTECTION',
+                        status: 'OPERATIONAL'
+                    },
+                    diagnostics: [
+                        { name: 'CPU.CORE', status: 'ONLINE', value: '97.3% EFFICIENCY' },
+                        { name: 'SENSORS.ARRAY', status: 'ONLINE', value: '8/8 SENSORS ACTIVE' },
+                        { name: 'MOTOR.CONTROL', status: 'ONLINE', value: 'SERVO RESPONSIVE' },
+                        { name: 'POWER.CELL', status: 'ONLINE', value: '89% CHARGE LEVEL' },
+                        { name: 'WIFI.MODULE', status: 'ONLINE', value: 'CONNECTED -67dBm' },
+                        { name: 'PROTECTION.SHIELD', status: 'ONLINE', value: 'ACTIVE PERIMETER' }
+                    ],
+                    sensors: [
+                        { name: 'SOIL.MOISTURE', value: 67, unit: '%', percentage: 67, status: 'OPTIMAL.RANGE' },
+                        { name: 'LIGHT.INTENSITY', value: 1240, unit: 'LUX', percentage: 78, status: 'SUFFICIENT.LEVELS' },
+                        { name: 'AMBIENT.TEMP', value: 24, unit: '°C', percentage: 65, status: 'IDEAL.CONDITIONS' },
+                        { name: 'HUMIDITY.LEVEL', value: 58, unit: '%', percentage: 58, status: 'WITHIN.PARAMETERS' }
+                    ],
+                    actions: [
+                        { name: 'ACTIVATE.WATERING', status: 'READY', available: true },
+                        { name: 'ADJUST.LIGHTING', status: 'READY', available: true },
+                        { name: 'ROTATE.POSITION', status: 'READY', available: true },
+                        { name: 'NUTRIENT.CYCLE', status: 'COOLDOWN', available: false },
+                        { name: 'PEST.SCAN', status: 'READY', available: true },
+                        { name: 'GROWTH.ANALYSIS', status: 'PROCESSING', available: false }
+                    ],
+                    techSpecs: {
+                        totalCost: 1346,
+                        bonusPoints: 6,
+                        complexity: 'HIGH',
+                        components: [
+                            { name: 'ESP32-C3.CONTROLLER', cost: 434, function: 'CENTRAL.PROCESSING', description: 'Main brain with WiFi/Bluetooth' },
+                            { name: 'DHT22.SENSOR', cost: 199, function: 'CLIMATE.MONITORING', description: 'Temperature and humidity detection' },
+                            { name: 'SOIL.MOISTURE.PROBE', cost: 70, function: 'HYDRATION.TRACKING', description: 'Plant water level monitoring' },
+                            { name: 'OLED.DISPLAY.128x64', cost: 220, function: 'STATUS.OUTPUT', description: 'Guardian face and messages' },
+                            { name: 'SERVO.MOTOR.SG90', cost: 150, function: 'PHYSICAL.MOVEMENT', description: 'Head rotation and gestures' },
+                            { name: 'RGB.LED.ARRAY', cost: 10, function: 'STATUS.LIGHTING', description: 'Mood and alert indicators' },
+                            { name: 'RELAY.MODULE.5V', cost: 85, function: 'POWER.CONTROL', description: 'Watering system activation' },
+                            { name: 'LDR.LIGHT.SENSOR', cost: 20, function: 'ILLUMINATION.DETECTION', description: 'Ambient light monitoring' },
+                            { name: 'BUZZER.ALERT.SYSTEM', cost: 15, function: 'AUDIO.ALERTS', description: 'Guardian voice and warnings' },
+                            { name: 'ULTRASONIC.RANGEFINDER', cost: 112, function: 'PROXIMITY.DETECTION', description: 'Perimeter monitoring' },
+                            { name: 'SUPPORT.ELECTRONICS', cost: 200, function: 'INFRASTRUCTURE', description: 'Wiring, resistors, breadboard' }
+                        ]
+                    }
+                }
+            },
+            methods: {
+                updateSystemTime() {
+                    const now = new Date();
+                    this.systemTime = now.toTimeString().split(' ')[0];
+                },
+                
+                executeAction(action) {
+                    if (!action.available) return;
+                    
+                    const messages = {
+                        'ACTIVATE.WATERING': 'INITIATING HYDRATION PROTOCOL. PLANTS WILL BE REFRESHED.',
+                        'ADJUST.LIGHTING': 'OPTIMIZING LIGHT SPECTRUM FOR PHOTOSYNTHESIS EFFICIENCY.',
+                        'ROTATE.POSITION': 'ADJUSTING GUARDIAN POSITION FOR MAXIMUM COVERAGE.',
+                        'PEST.SCAN': 'SCANNING FOR THREATS. NO HOSTILES DETECTED.',
+                        'GROWTH.ANALYSIS': 'ANALYZING PLANT DEVELOPMENT PATTERNS.'
+                    };
+                    
+                    this.guardian.currentMessage = messages[action.name] || 'EXECUTING COMMAND...';
+                    
+                    // Simulate action cooldown
+                    action.status = 'EXECUTING';
+                    action.available = false;
+                    
+                    setTimeout(() => {
+                        action.status = 'READY';
+                        action.available = true;
+                        this.guardian.currentMessage = 'GUARDIAN ONLINE. PLANT PROTECTION PROTOCOLS ACTIVE.';
+                    }, 3000);
+                },
+                
+                simulateData() {
+                    // Simulate sensor fluctuations
+                    this.sensors.forEach(sensor => {
+                        const variance = (Math.random() - 0.5) * 4;
+                        sensor.value = Math.max(0, Math.min(100, sensor.value + variance));
+                        sensor.percentage = (sensor.value / 100) * 100;
+                        
+                        if (sensor.value < 30) {
+                            sensor.status = 'CRITICAL.LEVELS';
+                        } else if (sensor.value < 50) {
+                            sensor.status = 'BELOW.OPTIMAL';
+                        } else {
+                            sensor.status = 'OPTIMAL.RANGE';
+                        }
+                    });
+                }
+            },
+            
+            mounted() {
+                // Update system time every second
+                setInterval(this.updateSystemTime, 1000);
+                this.updateSystemTime();
+                
+                // Simulate sensor data changes
+                setInterval(this.simulateData, 2000);
+                
+                console.log('🤖 GUARDIAN SYSTEM INITIALIZED 🤖');
+                console.log('🌱 PLANT PROTECTION PROTOCOLS ACTIVE 🌱');
+                console.log('⚡ ALL SYSTEMS NOMINAL ⚡');
+                
+                // Auto-show tech docs after 5 seconds for demo
+                setTimeout(() => {
+                    this.showTechDocs = true;
+                }, 5000);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

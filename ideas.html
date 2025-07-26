@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABSURD PROJECT IDEAS | Team Burn That Hardware</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'space': ['"Space Grotesk"', 'sans-serif'],
+                    },
+                    colors: {
+                        'neon': '#00ff41',
+                        'chaos': '#ff1744',
+                        'void': '#1a1a1a'
+                    },
+                    animation: {
+                        'pulse-neon': 'pulse-neon 2s ease-in-out infinite alternate',
+                        'wiggle': 'wiggle 1s ease-in-out infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'chaos': 'chaos 4s linear infinite'
+                    },
+                    keyframes: {
+                        'pulse-neon': {
+                            'from': { boxShadow: '0 0 5px #00ff41, 0 0 10px #00ff41' },
+                            'to': { boxShadow: '0 0 20px #00ff41, 0 0 30px #00ff41, 0 0 40px #00ff41' }
+                        },
+                        'wiggle': {
+                            '0%, 100%': { transform: 'rotate(-3deg)' },
+                            '50%': { transform: 'rotate(3deg)' }
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        'chaos': {
+                            '0%': { transform: 'rotate(0deg) scale(1)' },
+                            '25%': { transform: 'rotate(90deg) scale(1.1)' },
+                            '50%': { transform: 'rotate(180deg) scale(0.9)' },
+                            '75%': { transform: 'rotate(270deg) scale(1.1)' },
+                            '100%': { transform: 'rotate(360deg) scale(1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { font-family: 'Space Grotesk', sans-serif; }
+        
+        .brutal-shadow {
+            box-shadow: 8px 8px 0px #000, 16px 16px 0px #00ff41;
+        }
+        
+        .brutal-shadow:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px #000, 20px 20px 0px #00ff41;
+        }
+        
+        .chaos-text {
+            background: linear-gradient(45deg, #000, #00ff41, #000, #ff1744);
+            background-size: 400% 400%;
+            animation: chaos 3s ease-in-out infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .pixel-border {
+            border-style: solid;
+            border-width: 4px;
+            border-image: 
+                repeating-linear-gradient(45deg, 
+                    #000 0px, #000 4px, 
+                    transparent 4px, transparent 8px) 1;
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+        }
+        
+        .glitch::before {
+            animation: glitch-1 0.5s infinite;
+            color: #ff1744;
+            z-index: -1;
+        }
+        
+        .glitch::after {
+            animation: glitch-2 0.5s infinite;
+            color: #00ff41;
+            z-index: -2;
+        }
+        
+        @keyframes glitch-1 {
+            0%, 14%, 15%, 49%, 50%, 99%, 100% { transform: translate(0); }
+            15%, 49% { transform: translate(-2px, 2px); }
+        }
+        
+        @keyframes glitch-2 {
+            0%, 20%, 21%, 62%, 63%, 99%, 100% { transform: translate(0); }
+            21%, 62% { transform: translate(2px, -2px); }
+        }
+    </style>
+</head>
+<body class="font-space bg-white text-black min-h-screen overflow-x-hidden">
+    <div id="app">
+        <!-- CHAOTIC HEADER -->
+        <header class="bg-black text-white py-8 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute top-4 left-4 w-16 h-16 bg-neon animate-chaos"></div>
+                <div class="absolute top-8 right-8 w-8 h-8 bg-chaos animate-float"></div>
+                <div class="absolute bottom-4 left-1/3 w-12 h-12 border-4 border-neon animate-wiggle"></div>
+            </div>
+            <div class="container mx-auto px-4 text-center relative z-10">
+                <h1 class="text-6xl md:text-8xl font-black mb-4 glitch" data-text="ABSURD IDEAS">
+                    ABSURD IDEAS
+                </h1>
+                <p class="text-xl md:text-2xl font-bold chaos-text">
+                    FOR TEAM BURN THAT HARDWARE
+                </p>
+                <div class="mt-6 text-lg font-medium">
+                    <span class="animate-pulse-neon">Because why build normal when you can build LEGENDARY?</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- NAVIGATION -->
+        <nav class="bg-neon text-black py-4 border-b-4 border-black">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-wrap justify-center gap-6">
+                    <button 
+                        v-for="category in categories" 
+                        :key="category"
+                        @click="activeCategory = category"
+                        :class="activeCategory === category ? 'bg-black text-neon' : 'bg-white'"
+                        class="px-6 py-2 border-2 border-black font-black text-sm uppercase tracking-wider transition-all hover:animate-wiggle">
+                        {{ category }}
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- PROJECTS GRID -->
+        <main class="py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div 
+                        v-for="project in filteredProjects" 
+                        :key="project.id"
+                        class="brutal-shadow bg-white border-4 border-black transition-all duration-300 hover:animate-float">
+                        
+                        <!-- PROJECT HEADER -->
+                        <div class="bg-black text-white p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-black uppercase tracking-widest px-2 py-1 bg-neon text-black">
+                                    {{ project.category }}
+                                </span>
+                                <span class="text-2xl animate-wiggle">{{ project.emoji }}</span>
+                            </div>
+                            <h3 class="text-xl font-black uppercase tracking-tight">{{ project.name }}</h3>
+                        </div>
+                        
+                        <!-- PROJECT BODY -->
+                        <div class="p-6 space-y-4">
+                            <p class="text-sm font-medium leading-relaxed">{{ project.description }}</p>
+                            
+                            <div class="space-y-2">
+                                <h4 class="font-black text-sm uppercase">KEY COMPONENTS:</h4>
+                                <div class="flex flex-wrap gap-1">
+                                    <span 
+                                        v-for="component in project.components" 
+                                        :key="component"
+                                        class="text-xs bg-gray-100 border border-black px-2 py-1 font-bold">
+                                        {{ component }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-100 p-4 border-2 border-black">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-black text-sm">ESTIMATED COST:</span>
+                                    <span class="font-black text-lg" :class="project.cost > 1500 ? 'text-chaos' : 'text-neon'">
+                                        ₹{{ project.cost }}
+                                    </span>
+                                </div>
+                                <div class="w-full bg-white h-2 border border-black">
+                                    <div 
+                                        class="h-full transition-all"
+                                        :class="project.cost > 1500 ? 'bg-chaos' : 'bg-neon'"
+                                        :style="`width: ${Math.min((project.cost/2000) * 100, 100)}%`">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-neon p-4 border-2 border-black">
+                                <h4 class="font-black text-sm uppercase mb-2">ABSURDITY LEVEL:</h4>
+                                <p class="text-xs font-bold">{{ project.absurdity }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- PROJECT FOOTER -->
+                        <div class="bg-gray-100 p-4 border-t-4 border-black">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-black uppercase">DIFFICULTY:</span>
+                                <div class="flex gap-1">
+                                    <div 
+                                        v-for="n in 5" 
+                                        :key="n"
+                                        class="w-3 h-3 border border-black"
+                                        :class="n <= project.difficulty ? 'bg-black' : 'bg-white'">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER OF CHAOS -->
+        <footer class="bg-void text-white py-8 border-t-4 border-neon">
+            <div class="container mx-auto px-4 text-center">
+                <h3 class="text-2xl font-black mb-4 chaos-text">
+                    REMEMBER: NORMAL IS THE ENEMY OF LEGENDARY
+                </h3>
+                <p class="text-lg font-medium mb-6">
+                    Build something so absurd that even the judges question reality itself.
+                </p>
+                <div class="flex justify-center space-x-8 text-sm font-bold">
+                    <span class="animate-pulse-neon">⚡ BURN THAT HARDWARE ⚡</span>
+                    <span class="animate-wiggle">🔥 LEGENDARY OR BUST 🔥</span>
+                    <span class="animate-float">💀 CHAOS ENGINEERING 💀</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        const ABSURD_PROJECTS = [
+            // COMPLETELY UNHINGED
+            {
+                id: 1,
+                name: "MOOD RING FOR YOUR BREADBOARD",
+                category: "UNHINGED",
+                emoji: "💍",
+                description: "A breadboard that changes color based on how frustrated you are with your circuit. Uses DHT22 for stress-sweat detection, RGB LEDs for mood display, and vibration sensor for table-banging intensity.",
+                components: ["DHT22", "RGB LED", "SW420 Vibration", "OLED Display", "Potentiometer"],
+                cost: 467,
+                difficulty: 3,
+                absurdity: "Your breadboard literally becomes more empathetic than most humans. It glows red when you're about to throw it out the window."
+            },
+            {
+                id: 2,
+                name: "ALEXA FOR ANTS",
+                category: "UNHINGED",
+                emoji: "🐜",
+                description: "A voice-controlled assistant for insects. Micro speakers, tiny OLED display, and motion sensors to detect ant trails. Responds to high-frequency ant commands (translation not included).",
+                components: ["MEMS Microphone", "Buzzer", "OLED Display", "IR Sensor", "Servo Motor"],
+                cost: 964,
+                difficulty: 4,
+                absurdity: "Finally, someone thinks about ant productivity. Features include: weather updates for anthills, traffic reports for pheromone trails, and reminders to carry 50x their body weight."
+            },
+            {
+                id: 3,
+                name: "EXISTENTIAL CRISIS DETECTOR",
+                category: "UNHINGED",
+                emoji: "🤔",
+                description: "Monitors your WiFi traffic for searches like 'meaning of life' and 'why do we exist', then plays philosophical quotes through a buzzer in morse code while flashing LEDs dramatically.",
+                components: ["Glyph C3", "Buzzer", "5mm LED", "OLED Display"],
+                cost: 676,
+                difficulty: 3,
+                absurdity: "Your electronics now judge your life choices. The OLED displays Nietzsche quotes while LEDs flash in existential dread patterns."
+            },
+
+            // BEAUTIFULLY BROKEN
+            {
+                id: 4,
+                name: "SOCIAL MEDIA DETOX SHOCK COLLAR",
+                category: "BROKEN",
+                emoji: "📱",
+                description: "Wearable device that vibrates increasingly aggressively the longer you're on social media. Uses proximity sensors to detect phones and a escalating buzzer system for behavior modification.",
+                components: ["Ultrasonic Sensor", "Buzzer", "Vibration Sensor", "Potentiometer", "RGB LED"],
+                cost: 242,
+                difficulty: 2,
+                absurdity: "Because sometimes you need technology to save you FROM technology. Features escalating alerts from gentle hum to full earthquake simulation."
+            },
+            {
+                id: 5,
+                name: "PROCRASTINATION PRODUCTIVITY PARADOX",
+                category: "BROKEN",
+                emoji: "⏰",
+                description: "A device that becomes increasingly useful the more you procrastinate. Starts as a simple clock, evolves into a full entertainment system with games, music, and memes displayed on OLED.",
+                components: ["OLED Display", "Buzzer", "Push Button", "Potentiometer", "RGB LED"],
+                cost: 267,
+                difficulty: 3,
+                absurdity: "The ultimate productivity hack: make procrastination so entertaining that you procrastinate from procrastinating and accidentally get work done."
+            },
+            {
+                id: 6,
+                name: "INTROVERT'S PEOPLE RADAR",
+                category: "BROKEN",
+                emoji: "🎯",
+                description: "Ultrasonic sensor array that detects approaching humans and provides escape route suggestions on OLED display. Includes stealth mode with silent vibration alerts.",
+                components: ["Ultrasonic Sensor", "OLED Display", "Vibration Sensor", "Buzzer", "LDR"],
+                cost: 391,
+                difficulty: 3,
+                absurdity: "Finally, technology that understands your need for personal space. Displays things like 'HUMAN INCOMING - FLEE TO BATHROOM' and 'SMALL TALK DETECTED - ACTIVATE PHONE STARE.'"
+            },
+
+            // QUESTIONABLY GENIUS
+            {
+                id: 7,
+                name: "PLANT GOSSIP NETWORK",
+                category: "GENIUS",
+                emoji: "🌱",
+                description: "Multiple soil humidity sensors creating a plant communication network. Plants can 'text' each other about water levels, sunlight gossip, and root space drama via OLED displays.",
+                components: ["Soil Humidity", "OLED Display", "Glyph C3", "Buzzer", "RGB LED"],
+                cost: 891,
+                difficulty: 4,
+                absurdity: "Your houseplants now have their own social network. Watch them complain about your watering schedule and share photosynthesis tips."
+            },
+            {
+                id: 8,
+                name: "QUANTUM COFFEE PREDICTOR",
+                category: "GENIUS",
+                emoji: "☕",
+                description: "Uses random number generation via noise sensors to predict the exact moment you'll need coffee. Displays cosmic coffee wisdom and brewing recommendations.",
+                components: ["Condenser Mic", "OLED Display", "DHT22", "RGB LED", "Buzzer"],
+                cost: 477,
+                difficulty: 3,
+                absurdity: "Harnesses the chaos of the universe to solve humanity's greatest challenge: optimal caffeine timing. Features include aura-based bean selection and existential brewing methods."
+            },
+            {
+                id: 9,
+                name: "ANXIETY TRANSFER STATION",
+                category: "GENIUS",
+                emoji: "😰",
+                description: "Detects your stress levels via temperature and transfers the anxiety to a robotic surrogate that paces around nervously while you relax. Features worry-outsourcing technology.",
+                components: ["DHT22", "Servo Motor", "Ultrasonic", "RGB LED", "Buzzer"],
+                cost: 541,
+                difficulty: 4,
+                absurdity: "Why carry your own anxiety when a robot can do it for you? Watch your mechanical worry-buddy pace frantically while you achieve inner peace."
+            },
+
+            // PURE CHAOS
+            {
+                id: 10,
+                name: "REALITY GLITCH SIMULATOR",
+                category: "CHAOS",
+                emoji: "🌀",
+                description: "Randomly triggers LEDs, sounds, and servo movements to simulate living in a buggy simulation. Includes 'NPC behavior' mode and 'matrix error' alerts.",
+                components: ["RGB LED", "Servo Motor", "Buzzer", "OLED Display", "Vibration"],
+                cost: 417,
+                difficulty: 3,
+                absurdity: "For when you want to feel like you're living in a glitched video game. Features random lag spikes, reality.exe crashes, and NPC dialogue loops."
+            },
+            {
+                id: 11,
+                name: "INTERDIMENSIONAL DOORBELL",
+                category: "CHAOS",
+                emoji: "🚪",
+                description: "Motion-activated system that plays increasingly otherworldly sounds to convince visitors they've accidentally found a portal to another dimension.",
+                components: ["IR Sensor", "Buzzer", "RGB LED", "Servo Motor", "OLED"],
+                cost: 312,
+                difficulty: 2,
+                absurdity: "Transform your front door into a cosmic gateway. Visitors will either run away screaming or ask if you're accepting applications for interdimensional citizenship."
+            },
+            {
+                id: 12,
+                name: "CONSPIRACY THEORY GENERATOR 3000",
+                category: "CHAOS",
+                emoji: "👽",
+                description: "Combines random environmental data (temperature, light, sound) to generate and display increasingly elaborate conspiracy theories on OLED. Updates hourly with 'breaking' revelations.",
+                components: ["DHT22", "LDR", "Condenser Mic", "OLED", "RGB LED"],
+                cost: 267,
+                difficulty: 3,
+                absurdity: "Because someone needs to keep track of all the random connections between pigeons, WiFi signals, and the Illuminati. Features real-time paranoia updates."
+            },
+            {
+                id: 16,
+                name: "WIFI PASSWORD FORTUNE TELLER",
+                category: "CHAOS",
+                emoji: "🔮",
+                description: "Scans nearby WiFi networks and uses their signal strengths, names, and your current humidity levels to predict your romantic future. Displays cryptic relationship advice on OLED.",
+                components: ["Glyph C3", "DHT22", "OLED Display", "RGB LED"],
+                cost: 653,
+                difficulty: 3,
+                absurdity: "Your router knows more about your love life than you do. Features include: 'Your soulmate connects to LinksysRouter_2.4G' and 'Mercury is in microwave interference.'"
+            },
+            {
+                id: 17,
+                name: "EXISTENTIAL WEIGHT SCALE",
+                category: "CHAOS",
+                emoji: "⚖️",
+                description: "Uses vibration sensors to measure how heavily you step, correlating it with the crushing weight of existence. Displays philosophical observations about your daily burden.",
+                components: ["SW420 Vibration", "OLED Display", "DHT22", "RGB LED"],
+                cost: 317,
+                difficulty: 2,
+                absurdity: "Finally, a scale that measures what really matters: your spiritual baggage. Updates include 'You're carrying the weight of 47 unfinished projects' and 'Your anxiety weighs more than you do.'"
+            },
+            {
+                id: 18,
+                name: "PRODUCTIVITY GHOST DETECTOR",
+                category: "CHAOS",
+                emoji: "👻",
+                description: "Monitors ambient temperature changes and ultrasonic disturbances to detect the spirits of unfinished tasks haunting your workspace. Exorcism mode included.",
+                components: ["DHT22", "Ultrasonic Sensor", "Buzzer", "OLED", "RGB LED"],
+                cost: 459,
+                difficulty: 3,
+                absurdity: "Your procrastination has literally created paranormal activity. Detects ghosts of abandoned side projects, haunted TODO lists, and the spirit of that presentation you never finished."
+            },
+            {
+                id: 19,
+                name: "SOCIAL BATTERY INDICATOR",
+                category: "CHAOS",
+                emoji: "🔋",
+                description: "Uses sound levels and proximity sensors to track social interactions, displaying your remaining 'people energy' as a depleting battery on OLED. Includes recharge recommendations.",
+                components: ["Condenser Mic", "Ultrasonic Sensor", "OLED", "RGB LED"],
+                cost: 295,
+                difficulty: 2,
+                absurdity: "Your social anxiety is now quantified with scientific precision. Features low-battery warnings for human interaction and automatic 'hermit mode' activation when reserves hit critical."
+            },
+            {
+                id: 20,
+                name: "INTERNET ADDICTION EARLY WARNING SYSTEM",
+                category: "CHAOS",
+                emoji: "📡",
+                description: "Monitors WiFi signal strength fluctuations and correlates them with your stress levels via temperature sensors. Predicts when you're about to doom-scroll and intervenes with interpretive dance.",
+                components: ["Glyph C3", "DHT22", "Servo Motor", "Buzzer", "OLED"],
+                cost: 720,
+                difficulty: 4,
+                absurdity: "Your router is now your therapist. Detects pre-doom-scroll patterns and responds with robotic interpretive dance to redirect your attention to healthier activities."
+            },
+            {
+                id: 21,
+                name: "WEATHER-BASED MOOD MANIPULATION DEVICE",
+                category: "CHAOS",
+                emoji: "🌦️",
+                description: "Takes real weather data and combines it with random number generation to 'improve' your day by predicting alternate weather in parallel dimensions where you're happier.",
+                components: ["DHT22", "LDR", "OLED Display", "RGB LED", "Buzzer"],
+                cost: 284,
+                difficulty: 2,
+                absurdity: "Why accept today's weather when you could enjoy the forecast from Universe-B? Features include: 'In dimension #47, it's sunny and you remembered to bring your umbrella.'"
+            },
+            {
+                id: 22,
+                name: "CRYPTO PRICE PROPHET VIA HOUSEPLANT DIVINATION",
+                category: "CHAOS",
+                emoji: "🌿",
+                description: "Monitors soil moisture, light levels, and temperature from multiple plants to predict cryptocurrency trends. Because plants understand the earth better than Wall Street understands economics.",
+                components: ["Soil Humidity", "LDR", "DHT22", "OLED", "Glyph C3"],
+                cost: 782,
+                difficulty: 4,
+                absurdity: "Your philodendron is now a financial advisor. Generates investment advice based on root growth patterns and photosynthesis efficiency. Surprisingly accurate because plants don't have human greed."
+            },
+            {
+                id: 23,
+                name: "SIMULATION ADMINISTRATOR CONTACT SYSTEM",
+                category: "CHAOS",
+                emoji: "🎮",
+                description: "Detects patterns in electronic interference, random LED flickers, and environmental noise to compose and display formal complaints to whoever is running this reality simulation.",
+                components: ["Condenser Mic", "RGB LED", "DHT22", "OLED", "Vibration"],
+                cost: 352,
+                difficulty: 3,
+                absurdity: "Finally, a customer service hotline for existence itself. Auto-generates support tickets like: 'Bug Report: Gravity still working on Monday mornings' and 'Feature Request: More coffee, less taxes.'"
+            },
+
+            // PRACTICAL NONSENSE
+            {
+                id: 13,
+                name: "SMART RUBBER DUCK DEBUGGER",
+                category: "PRACTICAL",
+                emoji: "🦆",
+                description: "An AI-powered rubber duck that actually talks back during debugging sessions. Uses speech recognition to provide increasingly sarcastic responses to your coding problems.",
+                components: ["MEMS Microphone", "Buzzer", "OLED Display", "Glyph C3"],
+                cost: 870,
+                difficulty: 4,
+                absurdity: "Finally, a rubber duck with opinions. Features include passive-aggressive quacking, existential debugging advice, and the ability to judge your variable naming choices."
+            },
+            {
+                id: 14,
+                name: "MEETING BINGO AUTOMATION",
+                category: "PRACTICAL",
+                emoji: "🎯",
+                description: "Listens to meeting audio and automatically detects corporate buzzwords, updating your bingo card in real-time. Vibrates for near-wins and plays victory sounds for bingo.",
+                components: ["MEMS Microphone", "OLED Display", "Vibration", "Buzzer"],
+                cost: 552,
+                difficulty: 3,
+                absurdity: "Transform soul-crushing meetings into competitive sport. Automatically detects 'synergy,' 'circle back,' and 'low hanging fruit' while keeping score."
+            },
+            {
+                id: 15,
+                name: "PROCRASTINATION ACCOUNTABILITY ROBOT",
+                category: "PRACTICAL",
+                emoji: "🤖",
+                description: "Follows you around (via wheels) making disappointed robot noises when you're not being productive. Uses motion detection and timer logic to enforce work sessions.",
+                components: ["DC Motor", "Wheels", "Ultrasonic", "Buzzer", "OLED"],
+                cost: 307,
+                difficulty: 3,
+                absurdity: "A judgmental robot companion that's more disappointed in you than your parents. Features include disapproving beeps, passive-aggressive following, and productivity shaming."
+            }
+        ];
+
+        createApp({
+            data() {
+                return {
+                    projects: ABSURD_PROJECTS,
+                    activeCategory: 'ALL',
+                    categories: ['ALL', 'UNHINGED', 'BROKEN', 'GENIUS', 'CHAOS', 'PRACTICAL']
+                }
+            },
+            computed: {
+                filteredProjects() {
+                    if (this.activeCategory === 'ALL') {
+                        return this.projects;
+                    }
+                    return this.projects.filter(project => project.category === this.activeCategory);
+                }
+            },
+            mounted() {
+                // Add some chaos to the page load
+                console.log("🔥 BURN THAT HARDWARE - IDEAS PAGE LOADED 🔥");
+                console.log("💀 NORMAL IS THE ENEMY OF LEGENDARY 💀");
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURN THAT HARDWARE | Component Arsenal v2.0</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'space': ['"Space Grotesk"', 'sans-serif'],
+                    },
+                    colors: {
+                        'neon': '#00ff41',
+                        'neon-dark': '#00cc33'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate'
+                    },
+                    keyframes: {
+                        'glow': {
+                            'from': { boxShadow: '0 0 5px #00ff41' },
+                            'to': { boxShadow: '0 0 20px #00ff41, 0 0 30px #00ff41' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { font-family: 'Space Grotesk', sans-serif; }
+        
+        /* PIXEL PERFECT CARD STYLING */
+        .component-card {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .component-card:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 4px 4px 0px #000, 8px 8px 0px #000;
+        }
+        
+        .component-card.selected {
+            border-color: #00ff41 !important;
+            background-color: #000 !important;
+            color: white !important;
+        }
+        
+        .component-card.selected:hover {
+            box-shadow: 4px 4px 0px #00ff41, 8px 8px 0px #00ff41;
+        }
+        
+        .component-card.disabled {
+            opacity: 0.6;
+            filter: grayscale(100%);
+            cursor: not-allowed;
+        }
+        
+        .component-card.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* PIXEL GRID OVERLAY */
+        .pixel-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(90deg, transparent 24px, rgba(0,0,0,0.03) 25px, rgba(0,0,0,0.03) 26px, transparent 27px),
+                linear-gradient(rgba(0,0,0,0.03) 24px, transparent 25px, transparent 26px, rgba(0,0,0,0.03) 27px);
+            background-size: 27px 27px;
+            pointer-events: none;
+        }
+        
+        /* NEON BUTTON EFFECTS */
+        .btn-neon {
+            background-color: #00ff41 !important;
+            color: black !important;
+            border-color: #00ff41 !important;
+        }
+        
+        .btn-neon:hover {
+            background-color: #00cc33 !important;
+            animation: glow 0.5s ease-in-out;
+        }
+        
+        /* CATEGORY BADGES */
+        .category-badge {
+            font-family: 'Space Grotesk', monospace;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+        
+        .selected .category-badge {
+            background-color: #00ff41 !important;
+            color: black !important;
+        }
+        
+        /* PRICE GLOW EFFECT */
+        .price-glow {
+            text-shadow: 0 0 10px #00ff41;
+        }
+        
+        /* BRUTALIST SHADOWS */
+        .shadow-brutal {
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
+        }
+        
+        .shadow-brutal-lg {
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 1);
+        }
+    </style>
+</head>
+<body class="font-space bg-white text-black min-h-screen">
+    <div id="app">
+        <!-- HEADER -->
+        <header class="sticky top-0 bg-white border-b-4 border-black z-50 shadow-brutal">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-8 h-8 bg-black transform rotate-45"></div>
+                        <div>
+                            <h1 class="text-3xl font-black tracking-tight">BURN THAT HARDWARE</h1>
+                            <p class="text-sm font-bold">Component Arsenal Selection v2.0</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-4xl font-black" :class="{ 'price-glow': totalCost > 1500 }">
+                            ₹{{ budget - totalCost }}
+                        </div>
+                        <div class="text-sm font-bold">Budget Remaining</div>
+                        <div class="text-xs font-medium">Bonus: {{ bonusPoints }} pts</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- BUDGET PROGRESS -->
+        <section class="bg-gray-100 py-6 border-b-2 border-black">
+            <div class="container mx-auto px-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-black text-lg">BUDGET USAGE</span>
+                    <span class="font-black text-lg">{{ Math.round((totalCost/budget) * 100) }}%</span>
+                </div>
+                <div class="w-full bg-gray-300 h-6 border-2 border-black shadow-brutal">
+                    <div 
+                        class="h-full transition-all duration-500"
+                        :class="totalCost > budget * 0.8 ? 'bg-neon animate-glow' : 'bg-black'"
+                        :style="`width: ${Math.min((totalCost/budget) * 100, 100)}%`">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FILTERS -->
+        <section class="py-6 border-b-2 border-gray-300">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <input 
+                        v-model="searchTerm"
+                        type="text" 
+                        placeholder="SEARCH COMPONENTS..." 
+                        class="px-4 py-3 border-2 border-black font-bold text-sm uppercase tracking-wider focus:outline-none focus:border-neon focus:shadow-[0_0_0_2px_#00ff41]">
+                    
+                    <select 
+                        v-model="categoryFilter"
+                        class="px-4 py-3 border-2 border-black font-bold text-sm uppercase tracking-wider focus:outline-none focus:border-neon">
+                        <option value="">ALL CATEGORIES</option>
+                        <option value="controller">CONTROLLERS</option>
+                        <option value="sensor">SENSORS</option>
+                        <option value="actuator">ACTUATORS</option>
+                        <option value="display">DISPLAYS</option>
+                        <option value="power">POWER</option>
+                        <option value="misc">COMPONENTS</option>
+                    </select>
+
+                    <button 
+                        @click="showSelectedOnly = !showSelectedOnly"
+                        :class="showSelectedOnly ? 'btn-neon' : 'bg-white hover:bg-black hover:text-white'"
+                        class="px-4 py-3 border-2 border-black font-bold text-sm uppercase tracking-wider transition-all">
+                        {{ showSelectedOnly ? 'SHOW ALL' : 'SHOW SELECTED' }}
+                    </button>
+
+                    <button 
+                        @click="clearAll"
+                        class="px-4 py-3 bg-black text-white border-2 border-black font-bold text-sm uppercase tracking-wider hover:bg-gray-800 transition-all">
+                        CLEAR ALL
+                    </button>
+
+                    <div class="text-center">
+                        <div class="text-2xl font-black">{{ selectedComponents.length }}</div>
+                        <div class="text-xs font-bold">SELECTED</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SELECTED COMPONENTS CART -->
+        <section v-if="selectedComponents.length > 0" class="bg-black text-white py-6">
+            <div class="container mx-auto px-4">
+                <h3 class="text-2xl font-black mb-4 tracking-tight">
+                    SELECTED COMPONENTS ({{ selectedComponents.length }})
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div 
+                        v-for="item in selectedComponents" 
+                        :key="item.id"
+                        class="bg-gray-800 border border-neon p-3 flex justify-between items-center hover:bg-gray-700 transition-all">
+                        <span class="text-white text-sm font-bold">{{ item.name }}</span>
+                        <span class="text-neon font-black">₹{{ item.price }}</span>
+                        <button 
+                            @click="removeComponent(item.id)"
+                            class="text-red-400 hover:text-red-300 text-xl font-black">×</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMPONENTS GRID -->
+        <main class="py-8">
+            <div class="container mx-auto px-4">
+                <h2 class="text-5xl font-black mb-8 tracking-tight">
+                    COMPONENTS<span class="text-sm align-super font-normal opacity-60">AVAILABLE</span>
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div 
+                        v-for="component in filteredComponents" 
+                        :key="component.id"
+                        class="component-card bg-white border-2 border-black relative"
+                        :class="{
+                            'selected': isSelected(component.id),
+                            'disabled': !isSelected(component.id) && (totalCost + component.price > budget)
+                        }">
+                        
+                        <!-- CATEGORY HEADER -->
+                        <div class="bg-gray-100 border-b-2 border-black p-3">
+                            <div class="flex justify-between items-center">
+                                <span class="category-badge bg-gray-200 text-black px-2 py-1 border border-black text-xs font-black uppercase">
+                                    {{ component.category.charAt(0) }}
+                                </span>
+                                <span class="text-xs font-bold opacity-60">#{{ component.id }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- COMPONENT IMAGE -->
+                        <div class="h-24 bg-gray-200 border-b-2 border-black flex items-center justify-center relative pixel-overlay overflow-hidden">
+                            <img 
+                                :src="component.image" 
+                                :alt="component.name"
+                                class="w-full h-full object-cover"
+                                @error="$event.target.style.display='none'"
+                                loading="lazy">
+                            <div v-if="!component.image" class="text-black text-xs font-bold">COMPONENT</div>
+                        </div>
+                        
+                        <!-- CARD BODY -->
+                        <div class="p-4 space-y-3">
+                            <h3 class="font-black text-base leading-tight tracking-tight uppercase">
+                                {{ component.name }}
+                            </h3>
+                            <p class="text-xs leading-relaxed font-medium opacity-80">
+                                {{ component.description }}
+                            </p>
+                            
+                            <div class="flex justify-between items-center pt-2">
+                                <span 
+                                    class="text-xl font-black tracking-tighter"
+                                    :class="{ 'price-glow': isSelected(component.id) }">
+                                    ₹{{ component.price }}
+                                </span>
+                                <span class="category-badge bg-gray-200 text-black px-2 py-1 border border-black text-xs font-black uppercase">
+                                    {{ component.category.toUpperCase() }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- CARD FOOTER -->
+                        <div class="bg-gray-50 border-t-2 border-black p-3">
+                            <button 
+                                @click="toggleComponent(component.id)"
+                                :disabled="!isSelected(component.id) && (totalCost + component.price > budget)"
+                                class="w-full px-4 py-3 border-2 border-black font-black text-sm uppercase tracking-wider transition-all"
+                                :class="{
+                                    'btn-neon': isSelected(component.id),
+                                    'bg-white hover:bg-black hover:text-white': !isSelected(component.id) && (totalCost + component.price <= budget),
+                                    'bg-gray-300 text-gray-500 cursor-not-allowed': !isSelected(component.id) && (totalCost + component.price > budget)
+                                }">
+                                {{ isSelected(component.id) ? '✓ SELECTED' : 
+                                   (totalCost + component.price > budget) ? 'OVER BUDGET' : 'ADD TO CART' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- STATS FOOTER -->
+        <footer class="bg-gray-100 border-t-4 border-black py-8 shadow-brutal-lg">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-3 gap-8 text-center">
+                    <div>
+                        <div class="text-4xl font-black">{{ selectedComponents.length }}</div>
+                        <div class="text-sm font-bold uppercase tracking-wider">Components</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black" :class="{ 'price-glow': totalCost > 1500 }">
+                            ₹{{ totalCost }}
+                        </div>
+                        <div class="text-sm font-bold uppercase tracking-wider">Total Cost</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-neon">{{ bonusPoints }}</div>
+                        <div class="text-sm font-bold uppercase tracking-wider">Bonus Points</div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        // COMPONENT DATA WITH REAL PRICES
+        const COMPONENTS_DATA = [
+            // Controllers
+            { id: 1, name: 'Glyph C3 (headers not soldered)', description: 'ESP32-C3 based development board with WiFi and Bluetooth LE', price: 434, category: 'controller', image: 'https://files.pcbcupid.com/Events/components/pcbcupid-C3.avif', inStock: true },
+            { id: 2, name: 'Glyph C6 (soldered)', description: 'ESP32-C6 based development board with advanced features', price: 552, category: 'controller', image: 'https://files.pcbcupid.com/Events/components/pcbcupid-C6.avif', inStock: true },
+            { id: 3, name: 'Glyph H2 (soldered)', description: 'ESP32-H2 based development board for IoT applications', price: 529, category: 'controller', image: 'https://files.pcbcupid.com/Events/components/pcbcupid-H2.avif', inStock: true },
+            
+            // Sensors
+            { id: 5, name: 'MEMS Microphone (1-Ch)', description: 'ICS-43434 high precision omnidirectional microphone I2S', price: 218, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/G-sense-MICROPHONE.avif', inStock: true },
+            { id: 6, name: 'MEMS Microphone (2-Ch)', description: 'ICS-43434 2-channel high precision microphone array', price: 319, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_G-sense-2ch-mic.avif', inStock: true },
+            { id: 12, name: 'Condenser Microphone', description: 'Sensitive analog microphone for audio capture', price: 20, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_condenser_mic.avif', inStock: true },
+            { id: 41, name: 'DHT22 Temp/Humidity Sensor', description: 'High-accuracy digital temperature and humidity sensor', price: 199, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_DHT22.avif', inStock: true },
+            { id: 42, name: 'Ultrasonic Sensor', description: 'Distance measurement sensor using sound waves', price: 112, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_ultrasonic%20sensor.avif', inStock: true },
+            { id: 43, name: 'IR Sensor', description: 'Infrared sensor for object detection and proximity', price: 40, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_IR%20Sensor.avif', inStock: true },
+            { id: 44, name: 'Limit Switch', description: 'Mechanical switch for position/presence detection', price: 99, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_LIMIT_SWITCH.avif', inStock: true },
+            { id: 45, name: 'Soil Humidity Sensor', description: 'Moisture sensor for plant and soil monitoring', price: 70, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Soil%20Humidity%20sensor.avif', inStock: true },
+            { id: 46, name: 'SW420 Vibration Sensor', description: 'Digital vibration/shock detection with adjustable sensitivity', price: 75, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_SW420-Tilt-Sensor-Module.avif', inStock: true },
+            { id: 47, name: 'ACS712 Current Sensor', description: 'Hall-effect current sensor (±20A range)', price: 80, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_acs712-5a-20a-30a-current-sensor.avif', inStock: true },
+            { id: 48, name: 'DRV5032 Hall Sensor', description: 'Ultra-low power digital Hall effect sensor', price: 120, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_DRV5032.avif', inStock: true },
+            { id: 50, name: 'Limit Switch (Right Angle)', description: 'Compact mechanical switch for position detection', price: 40, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/limit_switch.avif', inStock: true },
+            { id: 51, name: 'LDR (5mm)', description: 'Light dependent resistor for ambient light sensing', price: 20, category: 'sensor', image: 'https://files.pcbcupid.com/Events/components/ldr.avif', inStock: true },
+            
+            // Actuators
+            { id: 8, name: '1-Channel Relay Module', description: '5V relay module with optocoupler isolation', price: 85, category: 'actuator', image: 'https://files.pcbcupid.com/Events/components/gmod-pcbcupid-relay-1-ch.avif', inStock: true },
+            { id: 9, name: '2-Channel Relay Module', description: '5V dual relay module with optocoupler isolation', price: 179, category: 'actuator', image: 'https://files.pcbcupid.com/Events/components/G-mod-2ch-relay-module.avif', inStock: true },
+            { id: 11, name: 'Buzzer', description: 'Active buzzer for audio alerts and notifications', price: 15, category: 'actuator', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Buzzer_3V.avif', inStock: true },
+            { id: 38, name: 'DC Motor', description: 'Single shaft DC motor for mechanical movement', price: 70, category: 'actuator', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_DC%20Motor%20Single%20Shaft.avif', inStock: true },
+            { id: 40, name: 'Servo Motor', description: 'Precision-controlled motor with built-in feedback', price: 150, category: 'actuator', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Servo%20Motors.avif', inStock: true },
+            
+            // Displays
+            { id: 10, name: 'OLED Display (SH1106)', description: 'Monochrome OLED display for text and graphics', price: 220, category: 'display', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_OLED.avif', inStock: true },
+            { id: 27, name: '5mm Red LED', description: 'Standard red LED for indicators and status lights', price: 3, category: 'display', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_5mm_red_led.avif', inStock: true },
+            { id: 28, name: '5mm Green LED', description: 'Standard green LED for status indicators', price: 3, category: 'display', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_5mm_green_led.avif', inStock: true },
+            { id: 29, name: '3mm Red LED', description: 'Compact red LED for space-constrained applications', price: 2, category: 'display', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_3mm_red_led.avif', inStock: true },
+            { id: 30, name: 'RGB LED', description: 'Full-color LED with PWM control capabilities', price: 10, category: 'display', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_RGB%20LED.avif', inStock: true },
+            { id: 31, name: '7-Segment Display', description: 'Numeric display with common cathode configuration', price: 12, category: 'display', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_7%20segment_display.avif', inStock: true },
+            
+            // Power
+            { id: 54, name: '5V 1A Power Adapter', description: 'Compact power supply for electronics projects', price: 150, category: 'power', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_5V%201A%20Adaptor.avif', inStock: true },
+            { id: 55, name: 'DC Power Connector', description: 'Female DC adapter connector for power supplies', price: 25, category: 'power', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_dc%20female%20adaptor.avif', inStock: true },
+            
+            // Components/Misc
+            { id: 4, name: 'FR4 Perfboard', description: 'High quality zero board PCB for prototyping', price: 35, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_FR4.avif', inStock: true },
+            { id: 7, name: 'MicroSD Card Module', description: 'SPI/SDIO/SDMMC card breakout board - 3.3V', price: 99, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_G-mod-SD_Card.avif', inStock: true },
+            { id: 13, name: 'Self-Lock Push Button', description: 'Tactile push button switch with self-locking mechanism', price: 10, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Push_%20button_self_lock.avif', inStock: true },
+            { id: 14, name: 'Right Angle Push Button', description: 'Compact right-angle tactile switch for edge mounting', price: 5, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Right_angle_push_button.avif', inStock: true },
+            { id: 15, name: 'Push Button with Cap', description: 'Standard push button switch with comfortable cap', price: 20, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Push_button_with_cap.avif', inStock: true },
+            { id: 16, name: 'SMT Tactile Switch', description: 'Low-profile SMT tactile switch (TS04-66-65-BK-160)', price: 20, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Push_button_TS04.avif', inStock: true },
+            { id: 17, name: 'SPDT Slide Switch', description: 'Compact PCB-mount slide switch (OS202011MS2QN1)', price: 89, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_OS202011MS2QN1_Slide_switch_spdt.avif', inStock: true },
+            { id: 18, name: 'RMC 2pin Female Connector', description: 'Compact 2-pin female RMC connector for secure connections', price: 9, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_RMC2_pin_female_connecter.avif', inStock: true },
+            { id: 19, name: 'RMC 3pin Female Connector', description: 'Compact 3-pin female RMC connector for reliable connections', price: 10, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_RMC_3_Pin_Female_connector.avif', inStock: true },
+            { id: 20, name: 'RMC 4pin Female Connector', description: 'Compact 4-pin female RMC connector for organized connections', price: 11, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_RMC%204%20Pin%20Female%20connector.avif', inStock: true },
+            { id: 21, name: '2pin Male WTB Connector', description: '2-pin male straight single-row Wire-to-Board connector', price: 5, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_2_pin_male_connector.avif', inStock: true },
+            { id: 22, name: '3pin Male WTB Connector', description: '3-pin male straight single-row Wire-to-Board connector', price: 5, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_3_%20pin_male_connector.avif', inStock: true },
+            { id: 23, name: '4pin Male WTB Connector', description: '4-pin male straight single-row Wire-to-Board connector', price: 5, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_4%20Pin%20Male%20Straight%20Single%20Row%20WTB%20Connector.avif', inStock: true },
+            { id: 24, name: '2pin JST Right Angle Connector', description: '2-pin JST male right-angle connector for compact connections', price: 5, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_2%20Pin%20JST%20Male%20Right%20Angle%20Connector.avif', inStock: true },
+            { id: 25, name: '3pin JST Right Angle Connector', description: '3-pin JST male right-angle connector for low-profile connections', price: 6, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_3_pin_jst_male_connector.avif', inStock: true },
+            { id: 26, name: '4pin JST Right Angle Connector', description: '4-pin JST male right-angle connector for space-saving connections', price: 7, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_4%20Pin%20JST%20Male%20Right%20Angle%20Connector.avif', inStock: true },
+            { id: 32, name: 'Resistor Assortment', description: 'Wide range of resistor values for prototyping', price: 70, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Resistor_box.avif', inStock: true },
+            { id: 33, name: 'Capacitor Assortment', description: 'Various capacitance values for circuit design', price: 125, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_capacitor_box.avif', inStock: true },
+            { id: 34, name: '1N4001 Diode', description: 'General-purpose silicon rectifier diode (50V)', price: 4, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_1n4007_diode.avif', inStock: true },
+            { id: 35, name: 'BC547 NPN Transistor', description: 'General-purpose NPN transistor for switching/amplification', price: 2, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_BC547_NPN_Transistor.avif', inStock: true },
+            { id: 36, name: 'BC557 PNP Transistor', description: 'General-purpose PNP transistor for low-power applications', price: 2, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_BC557_PNP_Transistors.avif', inStock: true },
+            { id: 37, name: 'Potentiometer', description: 'Adjustable resistor for voltage/signal control', price: 25, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_POTENTIOMETER2.avif', inStock: true },
+            { id: 39, name: 'L293D Motor Driver', description: 'Dual H-bridge IC for motor control', price: 30, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Motor%20Driver%20IC-%20L293D.avif', inStock: true },
+            { id: 49, name: 'BO Motor Wheels', description: 'Wheels for BO motors and robotics projects', price: 25, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/wheels.avif', inStock: true },
+            { id: 52, name: 'Breadboard', description: 'Solderless prototyping platform', price: 119, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Breadboard.avif', inStock: true },
+            { id: 53, name: 'Jumper Wires', description: 'Male-male, female-female, male-female connection wires', price: 70, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_jumper%20wires.avif', inStock: true },
+            { id: 56, name: 'Male Header Pins', description: 'Straight pins for PCB connections', price: 10, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_male%20header%20pins.avif', inStock: true },
+            { id: 57, name: 'Female Header Pins', description: 'Socket-style connectors for modular connections', price: 10, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/PCBCUPID_Female%20header%20pins.avif', inStock: true },
+            { id: 58, name: 'Connection Wires 1M', description: 'Essential wires for circuit connections', price: 15, category: 'misc', image: 'https://files.pcbcupid.com/Events/components/wires.avif', inStock: true }
+        ];
+
+        const BUDGET_CONFIG = {
+            total: 2000,
+            bonusPointsScale: [
+                { saved: 901, points: 10 },
+                { saved: 801, points: 9 },
+                { saved: 701, points: 8 },
+                { saved: 601, points: 7 },
+                { saved: 501, points: 6 },
+                { saved: 401, points: 5 },
+                { saved: 301, points: 4 },
+                { saved: 201, points: 3 },
+                { saved: 101, points: 2 },
+                { saved: 1, points: 1 },
+                { saved: 0, points: 0 }
+            ]
+        };
+
+        createApp({
+            data() {
+                return {
+                    budget: BUDGET_CONFIG.total,
+                    selectedComponents: [],
+                    searchTerm: '',
+                    categoryFilter: '',
+                    showSelectedOnly: false,
+                    components: COMPONENTS_DATA
+                }
+            },
+            computed: {
+                totalCost() {
+                    return this.selectedComponents.reduce((sum, item) => sum + item.price, 0);
+                },
+                bonusPoints() {
+                    const saved = this.budget - this.totalCost;
+                    for (const tier of BUDGET_CONFIG.bonusPointsScale) {
+                        if (saved >= tier.saved) return tier.points;
+                    }
+                    return 0;
+                },
+                filteredComponents() {
+                    let filtered = [...this.components];
+                    
+                    if (this.showSelectedOnly) {
+                        filtered = this.selectedComponents;
+                    }
+                    
+                    if (this.searchTerm) {
+                        filtered = filtered.filter(comp => 
+                            comp.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                            comp.description.toLowerCase().includes(this.searchTerm.toLowerCase())
+                        );
+                    }
+                    
+                    if (this.categoryFilter) {
+                        filtered = filtered.filter(comp => comp.category === this.categoryFilter);
+                    }
+                    
+                    return filtered;
+                }
+            },
+            methods: {
+                toggleComponent(componentId) {
+                    const component = this.components.find(c => c.id === componentId);
+                    if (!component) return;
+
+                    const isSelected = this.isSelected(componentId);
+                    
+                    if (isSelected) {
+                        this.selectedComponents = this.selectedComponents.filter(c => c.id !== componentId);
+                    } else {
+                        const newTotal = this.totalCost + component.price;
+                        if (newTotal <= this.budget) {
+                            this.selectedComponents.push(component);
+                        }
+                    }
+                },
+                removeComponent(componentId) {
+                    this.selectedComponents = this.selectedComponents.filter(c => c.id !== componentId);
+                },
+                isSelected(componentId) {
+                    return this.selectedComponents.some(c => c.id === componentId);
+                },
+                clearAll() {
+                    this.selectedComponents = [];
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
