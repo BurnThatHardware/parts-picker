@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURN THAT HARDWARE | Component Arsenal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'space': ['"Space Grotesk"', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="font-space bg-white text-black min-h-screen">
+    
+    <!-- Header -->
+    <header class="sticky top-0 bg-white border-b-2 border-black z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 bg-black"></div>
+                    <div>
+                        <h1 class="text-2xl font-bold tracking-tight">BURN THAT HARDWARE</h1>
+                        <p class="text-sm font-medium">Component Arsenal Selection</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold" id="budget-remaining">₹2000</div>
+                    <div class="text-sm font-medium">Budget Remaining</div>
+                    <div class="text-xs" id="bonus-display">Bonus: 0 pts</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Budget Progress -->
+    <section class="bg-gray-100 py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="font-semibold">Budget Usage</span>
+                <span id="budget-percentage">0%</span>
+            </div>
+            <div class="w-full bg-gray-300 h-4 border border-black">
+                <div id="budget-bar" class="bg-black h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="py-6 border-b border-gray-300">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="Search components..." 
+                    class="px-4 py-2 border-2 border-black font-medium focus:outline-none focus:ring-2 focus:ring-gray-500">
+                
+                <select id="category-filter" class="px-4 py-2 border-2 border-black font-medium focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    <option value="">All Categories</option>
+                    <option value="controller">Controllers</option>
+                    <option value="sensor">Sensors</option>
+                    <option value="actuator">Actuators</option>
+                    <option value="display">Displays</option>
+                    <option value="power">Power</option>
+                    <option value="misc">Components</option>
+                </select>
+
+                <button 
+                    id="toggle-selected" 
+                    class="px-4 py-2 border-2 border-black font-medium hover:bg-black hover:text-white transition-colors">
+                    Show All
+                </button>
+
+                <button 
+                    id="clear-all" 
+                    class="px-4 py-2 bg-black text-white font-medium hover:bg-gray-800 transition-colors">
+                    Clear All
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Selected Components Cart -->
+    <section id="selected-cart" class="bg-black text-white py-6 hidden">
+        <div class="container mx-auto px-4">
+            <h3 class="text-xl font-bold mb-4">SELECTED COMPONENTS (<span id="selected-count">0</span>)</h3>
+            <div id="selected-list" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+        </div>
+    </section>
+
+    <!-- Components Grid -->
+    <main class="py-8">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold mb-8 tracking-tight">
+                COMPONENTS<span class="text-sm align-super font-normal">AVAILABLE</span>
+            </h2>
+            
+            <div id="components-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Components will be injected here by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Stats Footer -->
+    <footer class="bg-gray-100 border-t-2 border-black py-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div>
+                    <div class="text-2xl font-bold" id="footer-components">0</div>
+                    <div class="text-sm font-medium">Components</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold" id="footer-cost">₹0</div>
+                    <div class="text-sm font-medium">Total Cost</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold" id="footer-bonus">0</div>
+                    <div class="text-sm font-medium">Bonus Points</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

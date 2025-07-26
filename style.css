@@ -1,0 +1,242 @@
+/* BURN THAT HARDWARE - MONO Design System CSS */
+
+/* Base Styles */
+* {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Typography Scale */
+.text-micro { font-size: 0.625rem; }
+.text-tiny { font-size: 0.75rem; }
+.text-small { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-large { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+.text-4xl { font-size: 2.25rem; }
+.text-5xl { font-size: 3rem; }
+
+/* Component Card Styles */
+.component-card {
+    @apply border-2 border-black bg-white p-6 transition-all duration-300;
+}
+
+.component-card:hover {
+    @apply shadow-lg;
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+    transform: translate(-2px, -2px);
+}
+
+.component-card.selected {
+    @apply bg-black text-white;
+}
+
+.component-card.selected:hover {
+    @apply bg-gray-800;
+    box-shadow: 8px 8px 0px rgba(107, 114, 128, 1);
+}
+
+.component-card.disabled {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+.component-card.disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Image Placeholder */
+.component-image {
+    @apply w-full h-32 bg-gray-200 border border-black mb-4 flex items-center justify-center;
+}
+
+.component-image.error {
+    @apply bg-gray-100;
+}
+
+.component-image img {
+    @apply w-full h-full object-cover;
+}
+
+/* Button Styles */
+.btn-primary {
+    @apply px-4 py-2 bg-black text-white font-medium border-2 border-black transition-all duration-200;
+}
+
+.btn-primary:hover {
+    @apply bg-gray-800 border-gray-800;
+}
+
+.btn-primary:active {
+    transform: translate(1px, 1px);
+}
+
+.btn-secondary {
+    @apply px-4 py-2 bg-white text-black font-medium border-2 border-black transition-all duration-200;
+}
+
+.btn-secondary:hover {
+    @apply bg-black text-white;
+}
+
+.btn-secondary:active {
+    transform: translate(1px, 1px);
+}
+
+.btn-danger {
+    @apply px-2 py-1 bg-white text-black border border-black text-sm transition-all duration-200;
+}
+
+.btn-danger:hover {
+    @apply bg-black text-white;
+}
+
+/* Selected Item Styles */
+.selected-item {
+    @apply bg-gray-800 border border-gray-600 p-3 flex justify-between items-center;
+}
+
+.selected-item:hover {
+    @apply bg-gray-700;
+}
+
+/* Category Badge */
+.category-badge {
+    @apply text-xs bg-gray-200 text-black px-2 py-1 border border-black font-medium;
+}
+
+/* Price Display */
+.price-display {
+    @apply font-bold text-lg;
+}
+
+/* Loading States */
+.loading {
+    @apply animate-pulse;
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+    .component-card {
+        @apply p-4;
+    }
+    
+    .text-4xl {
+        font-size: 2rem;
+    }
+    
+    .text-3xl {
+        font-size: 1.5rem;
+    }
+}
+
+/* Focus States for Accessibility */
+input:focus,
+select:focus,
+button:focus {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Print Styles */
+@media print {
+    .component-card {
+        break-inside: avoid;
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+    
+    header,
+    footer {
+        display: none;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .component-card {
+        border-width: 3px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        border-width: 3px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .component-card {
+        transition: none;
+    }
+    
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        transition: none;
+    }
+    
+    .component-card:hover {
+        transform: none;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Utility Classes */
+.border-thick {
+    border-width: 3px;
+}
+
+.shadow-brutal {
+    box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
+}
+
+.shadow-brutal-lg {
+    box-shadow: 12px 12px 0px rgba(0, 0, 0, 1);
+}
+
+/* Grid Enhancements */
+.components-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .components-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
